@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="me.weey.graduationproject.server.dao.inter.KeyDao">
+
+    <select id="findKey" resultMap="KeyMap">
+        SELECT * FROM server_key
+    </select>
+    <!--字段不一致需要映射-->
+    <resultMap id="KeyMap" type="Key">
+        <id column="id" property="id"/>
+        <result column="public_key" property="publicKey"/>
+        <result column="private_key" property="privateKey"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+</mapper>

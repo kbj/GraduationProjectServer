@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread][%logger{0}.%M] %m%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>e:/logs/GraduationProject/Server/logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread][%logger{0}.%M] %m%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!--logger繼承root的appender及level  -->
+   <!-- <logger name="org.springframework" level="info"/> &lt;!&ndash;顯示此package下的class的log  &ndash;&gt;
+    <logger name="org.hibernate" level="off"/>
+    <logger name="org.hibernate.type" level="off"/>&lt;!&ndash;會顯示hibernate JPA中DAO的值  &ndash;&gt;
+    <logger name="me.weey.graduationproject.server.service" level="info"/>
+    <logger name="me.weey.graduationproject.server.controller" level="info"/>
+    <logger name="me.weey.graduationproject.server.dao" level="warn"/>-->
+
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>

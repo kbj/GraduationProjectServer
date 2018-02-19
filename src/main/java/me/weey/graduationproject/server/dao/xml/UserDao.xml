@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="me.weey.graduationproject.server.dao.inter.UserDao">
+    <insert id="addUser" parameterType="User">
+        INSERT INTO chat_user(id, user_name, password, gender, email, bio, register_ip, register_brand, register_model,
+        imei) VALUES (#{id}, #{userName}, #{password}, #{gender}, #{email}, #{bio}, #{registerIp}, #{registerBrand},
+         #{registerModel}, #{IMEI})
+    </insert>
+
+    <select id="findUser" resultMap="UserMap">
+        SELECT * FROM chat_user WHERE id=#{id} OR user_name=#{userName} OR email=#{email}
+    </select>
+
+    <select id="getFriends" parameterType="String" resultType="String">
+        SELECT id FROM chat_friends WHERE invite_id=#{id}
+        UNION
+        SELECT invite_id FROM chat_friends WHERE id=#{id}
+    </select>
+    <!--字段不一致需要映射-->
+    <resultMap id="UserMap" type="User">
+        <id column="id" property="id"/>
+        <id column="user_name" property="userName"/>
+        <id column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="gender" property="gender"/>
+        <result column="bio" property="bio"/>
+        <result column="register_ip" property="registerIp"/>
+        <result column="register_brand" property="registerBrand"/>
+        <result column="register_model" property="registerModel"/>
+        <result column="imei" property="IMEI"/>
+    </resultMap>
+</mapper>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="me.weey.graduationproject.server.dao.inter.UserStatusDao">
+
+    <insert id="addUserStatus" parameterType="UserStatus">
+        INSERT INTO user_status(user_id, user_status, active_code) VALUES (#{userId}, #{userStatus}, #{activeCode})
+    </insert>
+
+    <update id="modifyStatus" parameterType="UserStatus">
+        UPDATE user_status SET user_status=#{userStatus} WHERE active_code=#{activeCode}
+    </update>
+
+    <select id="findByActiveCode" resultMap="UserMap">
+        SELECT * FROM user_status WHERE active_code=#{activeCode}
+    </select>
+    <!--字段不一致需要映射-->
+    <resultMap id="UserMap" type="UserStatus">
+        <id column="user_id" property="userId"/>
+        <result column="user_status" property="userStatus"/>
+        <result column="active_code" property="activeCode"/>
+    </resultMap>
+
+    <select id="findById" resultMap="UserMap">
+        SELECT * FROM user_status WHERE user_id=#{id}
+    </select>
+</mapper>

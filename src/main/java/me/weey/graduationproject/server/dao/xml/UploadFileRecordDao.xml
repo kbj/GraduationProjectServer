@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="me.weey.graduationproject.server.dao.inter.UploadFilRecordDao">
+
+    <!--新增文件上传记录-->
+    <insert id="addRecord" parameterType="FileRecord">
+        INSERT INTO file_upload_record(fileSavePath, fileAccessPath, fileUploadTime) values(#{fileSavePath}, #{fileAccessPath}, #{fileUploadTime})
+    </insert>
+
+    <!--查找所有的文件-->
+    <select id="findAllFiles" resultType="FileRecord">
+        SELECT * FROM file_upload_record
+    </select>
+
+    <!--删除文件的记录-->
+    <delete id="deleteFileRecord" parameterType="String">
+        DELETE FROM file_upload_record WHERE fileSavePath = #{fileSavePath}
+    </delete>
+
+    <!--根据哈希值查找-->
+    <select id="findByHash" parameterType="String" resultType="FileRecord">
+        SELECT * FROM file_upload_record WHERE fileAccessPath = #{hashCode}
+    </select>
+
+    <!--新增第一次下载时间的记录-->
+    <update id="addFirstDownloadTime">
+        UPDATE file_upload_record SET firstDownloadTime = #{time} WHERE fileAccessPath = #{fileAccessPath}
+    </update>
+</mapper>

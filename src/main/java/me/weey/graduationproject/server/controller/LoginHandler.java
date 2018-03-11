@@ -12,6 +12,7 @@ import me.weey.graduationproject.server.utils.Constant;
 import me.weey.graduationproject.server.utils.ECDSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -19,6 +20,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -63,7 +65,7 @@ public class LoginHandler extends TextWebSocketHandler {
     }
 
     /**
-     * 接收到消息的处理
+     * 接收到文本消息的处理
      */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
@@ -97,6 +99,17 @@ public class LoginHandler extends TextWebSocketHandler {
                 }
                 break;
         }
+    }
+
+    /**
+     * 接收到二进制消息
+     * @param session
+     * @param message
+     */
+    @Override
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
+        super.handleBinaryMessage(session, message);
+        ByteBuffer byteBuffer = message.getPayload();
     }
 
     /**

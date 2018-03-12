@@ -1,5 +1,6 @@
 package me.weey.graduationproject.server.service.inter;
 
+import me.weey.graduationproject.server.entity.OnlineStatus;
 import me.weey.graduationproject.server.entity.UserStatus;
 
 /**
@@ -9,4 +10,8 @@ import me.weey.graduationproject.server.entity.UserStatus;
 public interface IUserStatusService {
 
     UserStatus findUserStatus(String id);
+
+    OnlineStatus findOnlineStatus(String id);
+
+    void updateOnlineStatus(String id, Boolean isLogin);
 }

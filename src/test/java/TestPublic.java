@@ -1,9 +1,8 @@
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
@@ -129,9 +128,59 @@ public class TestPublic {
             kgen.init(256, new SecureRandom((System.currentTimeMillis()+"").getBytes("UTF-8")));
             SecretKey secretKey = kgen.generateKey();
             byte[] encoded = secretKey.getEncoded();
+
+            SymmetricCrypto aes = new SymmetricCrypto(SymmetricAlgorithm.AES, encoded);
+            byte[] encrypt = aes.encrypt(new FileInputStream(new File("e:/9ea683b7d0a20cf45025ddac75094b36acaf9934.jpg")));
+
+            byte[] decrypt = aes.decrypt(encrypt);
+            FileWriter fileWriter = FileWriter.create(new File("e:/back.jpg"));
+            fileWriter.write(decrypt, 0, decrypt.length);
             System.out.println(encoded.length);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException | FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testHASH() {
+        int apHash = HashUtil.apHash("weikai");
+        long weikai = HashUtil.tianlHash("weikai");
+        System.out.println(apHash);
+        System.out.println(weikai);
+
+        String url = "\"http://192.168.157.1:8080/file/download/-1512003541\"";
+        String urlLink = JSON.parseObject(url, String.class);
+        System.out.println(urlLink);
+    }
+
+    @Test
+    public void testAES1(){
+        File file = new File("C:\\Users\\frida\\Desktop\\1520684534088");
+        String base = "i1RimCUqDkoHMO6hNXsHLWSFOZd6J5jmeKadJk7cN1o=";
+        byte[] key = Base64.decode(base);
+        //构建
+        SymmetricCrypto aes = new SymmetricCrypto(SymmetricAlgorithm.AES, key);
+        FileReader fileReader = FileReader.create(file);
+        byte[] decrypt = aes.decrypt(fileReader.readBytes());
+
+        System.out.println(decrypt.length);
+        FileWriter fileWriter = FileWriter.create(new File("e:/a.jpg"));
+        fileWriter.write(decrypt, 0, decrypt.length);
+        System.out.println(decrypt);
+    }
+
+    @Test
+    public void testMD5() {
+        Digester md5 = new Digester(DigestAlgorithm.MD5);
+        String digestHex = md5.digestHex("\\WxHyYK+!d4+TUbR");
+        System.out.println(digestHex);
+    }
+
+    @Test
+    public void testDelete() {
+        File file = new File("E:\\files\\code\\java\\GraduationProjectServer\\target\\GraduationProject-Server\\tempFile\\542781f10b704b82b91c26bfc6088d79");
+        System.out.println(file.length());
+        file.delete();
+        System.out.println(file.exists());
     }
 }

@@ -6,6 +6,7 @@ import cn.hutool.log.LogFactory;
 import com.alibaba.fastjson.JSON;
 import me.weey.graduationproject.server.entity.DataStructure;
 import me.weey.graduationproject.server.entity.HttpResponse;
+import me.weey.graduationproject.server.entity.OnlineStatus;
 import me.weey.graduationproject.server.entity.User;
 import me.weey.graduationproject.server.service.inter.*;
 import me.weey.graduationproject.server.utils.Constant;
@@ -25,9 +26,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -120,15 +119,15 @@ public class LoginHandler extends TextWebSocketHandler {
         switch (dataStructure.getMessageType()) {
             case Constant.MESSAGE_TYPE_IS_ONLINE:
                 //流程一，判断在线状态
-                WebSocketSession socketSession = Constant.getLoginSessionInstant().get(dataStructure.getToID());
-                if (socketSession != null) {
-                    //对方也在线
-                    dataStructure.setMessage("true");
+                OnlineStatus onlineStatus = userStatusService.findOnlineStatus(dataStructure.getToID());
+                if (onlineStatus != null) {
+                    //返回在线状态
+                    dataStructure.setMessage(JSON.toJSONString(onlineStatus));
                     response(Constant.CODE_SUCCESS, JSON.toJSONString(dataStructure), session, dataStructure.getMessageType());
                 } else {
-                    //不在线
+                    //在线状态为空，默认返回不在线
                     dataStructure.setMessage("false");
-                    response(Constant.CODE_SUCCESS, JSON.toJSONString(dataStructure), session, dataStructure.getMessageType());
+                    response(Constant.CODE_FAILURE, JSON.toJSONString(dataStructure), session, dataStructure.getMessageType());
                 }
                 break;
             case Constant.MESSAGE_TYPE_SIGNATURE:
@@ -182,7 +181,15 @@ public class LoginHandler extends TextWebSocketHandler {
         //连接断开以后，把session从set移除
         ConcurrentHashMap<String, WebSocketSession> map = Constant.getLoginSessionInstant();
         //判断session是否存在，存在的话就移除
-        map.entrySet().removeIf(item -> session.equals(item.getValue()));
+        Set<Map.Entry<String, WebSocketSession>> entrySet = map.entrySet();
+        for (Map.Entry<String, WebSocketSession> maps : entrySet) {
+            if (maps.getValue().equals(session)) {
+                String id = maps.getKey();
+                map.remove(id);
+                userStatusService.updateOnlineStatus(id, false);
+                break;
+            }
+        }
     }
 
     /**
@@ -253,6 +260,8 @@ public class LoginHandler extends TextWebSocketHandler {
             //成功
             String userJSON = JSON.toJSONString(login);
             response(Constant.CODE_SUCCESS, userJSON, session, dataStructure.getMessageType());
+            //更新登录状态
+            userStatusService.updateOnlineStatus(login.getId(), true);
         } else {
             //失败
             response(Constant.CODE_CHECK_FAILURE, "用户名/邮箱/密码错误", session, dataStructure.getMessageType());

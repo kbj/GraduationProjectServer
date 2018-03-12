@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="me.weey.graduationproject.server.dao.inter.OnlineStatusDao">
+
+    <!--查找用户的在线状态-->
+    <select id="findByUserId" parameterType="String" resultType="OnlineStatus">
+        SELECT * FROM online_status WHERE userId = #{userID}
+    </select>
+
+    <!--更新登录成功的状态-->
+    <update id="updateLoginStatus">
+        UPDATE online_status SET isOnline = 1, loginTime = #{time} WHERE userId = #{id}
+    </update>
+
+    <!--更新离线的状态-->
+    <update id="updateLogOutStatus">
+        UPDATE online_status SET isOnline = 0, logOutTime = #{time} WHERE userId = #{id}
+    </update>
+
+    <!--新增条目-->
+    <insert id="addNewUserStatus" parameterType="OnlineStatus">
+        INSERT INTO online_status(userId, isOnline, loginTime, logOutTime) VALUES (#{userId}, #{isOnline}, #{loginTime}, #{logOutTime})
+    </insert>
+</mapper>

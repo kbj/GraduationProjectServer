@@ -26,4 +26,9 @@ public interface UserDao {
      * 根据用户id获取这个用户的所有好友
      */
     List<String> getFriends(@Param("id") String id);
+
+    /**
+     * 新增好友
+     */
+    int addFriend(@Param("id") String id, @Param("inviteID") String inviteID);
 }

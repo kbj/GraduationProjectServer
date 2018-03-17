@@ -46,4 +46,9 @@ public interface IUserService {
      * 根据用户id获取这个用户的所有好友
      */
     List<User> getFriends(String userID);
+
+    /**
+     * 添加好友
+     */
+    int addFriend(String myID, String friendID);
 }

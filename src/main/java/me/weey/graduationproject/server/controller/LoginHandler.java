@@ -181,15 +181,19 @@ public class LoginHandler extends TextWebSocketHandler {
         //连接断开以后，把session从set移除
         ConcurrentHashMap<String, WebSocketSession> map = Constant.getLoginSessionInstant();
         //判断session是否存在，存在的话就移除
+        String id = "";
         Set<Map.Entry<String, WebSocketSession>> entrySet = map.entrySet();
         for (Map.Entry<String, WebSocketSession> maps : entrySet) {
             if (maps.getValue().equals(session)) {
-                String id = maps.getKey();
+                id = maps.getKey();
                 map.remove(id);
                 userStatusService.updateOnlineStatus(id, false);
                 break;
             }
         }
+        //移除这个账号对应的随机码
+        String finalId = id;
+        Constant.getAddFriendMap().entrySet().removeIf(item -> finalId.equals(item.getValue()));
     }
 
     /**
@@ -234,6 +238,7 @@ public class LoginHandler extends TextWebSocketHandler {
         }
         response(Constant.CODE_SUCCESS, json, session, dataStructure.getMessageType());
     }
+
 
     /**
      * 登录的逻辑

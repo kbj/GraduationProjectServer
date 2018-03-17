@@ -143,6 +143,15 @@ public class Constant {
     }
 
     /**
+     * 这个map存储的是加聊天的随机码与相关用户的对应
+     */
+    private static final ConcurrentHashMap<String, String> addFriendMap = new ConcurrentHashMap<>();
+
+    public static ConcurrentHashMap<String, String> getAddFriendMap() {
+        return addFriendMap;
+    }
+
+    /**
      * 服务器的ID用户
      * 静态内部类的单例模式
      */

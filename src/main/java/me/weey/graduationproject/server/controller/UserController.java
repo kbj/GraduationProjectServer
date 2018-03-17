@@ -8,6 +8,7 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import com.alibaba.fastjson.JSON;
 import me.weey.graduationproject.server.entity.Avatar;
 import me.weey.graduationproject.server.entity.HttpResponse;
 import me.weey.graduationproject.server.entity.User;
@@ -15,10 +16,13 @@ import me.weey.graduationproject.server.entity.UserStatus;
 import me.weey.graduationproject.server.service.inter.IUserService;
 import me.weey.graduationproject.server.utils.Constant;
 import me.weey.graduationproject.server.utils.IPUtil;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +31,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by WeiKai on 2018/01/23.
@@ -189,5 +195,93 @@ public class UserController {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         BufferedImage bufferedImage = ImageIO.read(inputStream);
         ImageIO.write(bufferedImage, "PNG", response.getOutputStream());
+    }
+
+    /**
+     * 获取随机的加好友的随机码
+     */
+    @ResponseBody
+    @RequestMapping(value = "/add/getRandomCode", method = RequestMethod.POST)
+    public String getAddRandomCode(@RequestParam("id") String id) {
+        if (StrUtil.hasEmpty(id)) return "";
+        //校验ID是否有用户
+        WebSocketSession socketSession = Constant.getLoginSessionInstant().get(id);
+        if (socketSession == null) return "";
+        //生成四位数随机码
+        String numString = "";
+        while (true) {
+            Random random = new Random(System.currentTimeMillis());
+            int randomNum = random.nextInt(10000);
+            //判断是否是四位数，不是四位数前面补0
+            if (randomNum <= 999) {
+                StringBuilder buffer = new StringBuilder();
+                for (int i = 0; i < (4 - String.valueOf(randomNum).length()); i++) {
+                    buffer.append(0);
+                }
+                buffer.append(randomNum);
+                numString = buffer.toString();
+            } else {
+                numString = String.valueOf(randomNum);
+            }
+            //判断这时候map中是否已经有这个数字了
+            if (Constant.getAddFriendMap().get(numString) == null) {
+                break;
+            }
+        }
+
+        //保存随机码到内存
+        Constant.getAddFriendMap().put(numString, id);
+        //返回随机码
+        return numString;
+    }
+
+    @RequestMapping("/add/friend")
+    @ResponseBody
+    public HttpResponse addFriend(String id, String randomCode) {
+        //校验参数
+        if (Constant.getLoginSessionInstant().get(id) == null) {
+            response.setStatusCode(Constant.CODE_FAILURE);
+            response.setMessage("");
+            return response;
+        }
+        String friendID = Constant.getAddFriendMap().get(randomCode);
+        if (StrUtil.hasEmpty(friendID)) {
+            response.setStatusCode(Constant.CODE_FAILURE);
+            response.setMessage("校验失败！请重新输入加友码！");
+            return response;
+        }
+
+        //尝试添加好友
+        int code = userService.addFriend(friendID, id);
+        response.setStatusCode(code);
+        switch (code) {
+            case Constant.CODE_FAILURE:
+                response.setMessage("你已经添加ta啦！");
+                break;
+            case Constant.CODE_SUCCESS:
+                //添加成功以后把现有的好友列表都发送给客户端
+                List<User> userList = userService.getFriends(id);
+                String jsonString = JSON.toJSONString(userList);
+                response.setMessage(jsonString);
+                //通过WebSocket来通知显示随机码的用户更新好友列表
+                WebSocketSession socketSession = Constant.getLoginSessionInstant().get(friendID);
+                if (socketSession != null && socketSession.isOpen()) {
+                    List<User> friends = userService.getFriends(friendID);
+                    if (friends != null) {
+                        HttpResponse httpResponse = new HttpResponse();
+                        httpResponse.setMessage(JSON.toJSONString(friends));
+                        httpResponse.setStatusCode(Constant.CODE_SUCCESS);
+                        httpResponse.setTime(new Date());
+                        httpResponse.setMessageType(Constant.MESSAGE_TYPE_GET_FRIENDS_LIST);
+                        try {
+                            socketSession.sendMessage(new TextMessage(JSON.toJSONString(httpResponse)));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                break;
+        }
+        return response;
     }
 }

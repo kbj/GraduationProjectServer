@@ -181,4 +181,24 @@ public class UserServiceImpl implements IUserService {
         return usersList;
     }
 
+    /**
+     * 添加好友
+     */
+    @Transactional
+    @Override
+    public int addFriend(String myID, String friendID) {
+        //获取本人的好友列表
+        List<User> friends = getFriends(myID);
+        for (User user : friends) {
+            if (user.getId().equals(friendID)) {
+                return Constant.CODE_FAILURE;
+            }
+        }
+        //不是好友，那就加
+        int i = userDao.addFriend(friendID, myID);
+        if (i > 0) {
+            return Constant.CODE_SUCCESS;
+        }
+        return Constant.CODE_FAILURE;
+    }
 }

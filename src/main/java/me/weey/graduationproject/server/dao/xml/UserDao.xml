@@ -19,6 +19,10 @@
         UNION
         SELECT invite_id FROM chat_friends WHERE id=#{id}
     </select>
+
+    <insert id="addFriend" parameterType="String">
+        INSERT INTO chat_friends(id, invite_id) VALUES (#{id}, #{inviteID})
+    </insert>
     <!--字段不一致需要映射-->
     <resultMap id="UserMap" type="User">
         <id column="id" property="id"/>

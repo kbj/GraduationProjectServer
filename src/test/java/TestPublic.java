@@ -28,6 +28,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TestPublic {
@@ -178,9 +179,20 @@ public class TestPublic {
 
     @Test
     public void testDelete() {
-        File file = new File("E:\\files\\code\\java\\GraduationProjectServer\\target\\GraduationProject-Server\\tempFile\\542781f10b704b82b91c26bfc6088d79");
-        System.out.println(file.length());
-        file.delete();
-        System.out.println(file.exists());
+        double v = Math.random() * 10000;
+        int floor = (int) Math.floor(v);
+        System.out.println(floor);
+
+        Random random = new Random(System.currentTimeMillis());
+        int i = random.nextInt(10000);
+        System.out.println(i);
+
+        int randomNum = 12;
+        StringBuffer buffer = new StringBuffer();
+        for (int i1 = 0; i1 < (4 - String.valueOf(randomNum).length()); i1++) {
+            buffer.append(0);
+        }
+        buffer.append(randomNum);
+        System.out.println(buffer.toString());
     }
 }

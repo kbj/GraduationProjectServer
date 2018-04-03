@@ -284,4 +284,38 @@ public class UserController {
         }
         return response;
     }
+
+    /**
+     * 更新个人信息
+     * @param infoType      消息类型
+     * @param infoContent   消息正文
+     * @param avatar        头像
+     * @return              更新结果
+     */
+    @ResponseBody
+    @RequestMapping(value = "/updateInfo", method = RequestMethod.POST)
+    public HttpResponse updateInfo(Integer infoType, String infoContent, String userID, String token,
+                                   @RequestParam(value = "avatar", required = false) MultipartFile avatar) throws IOException {
+        //非空校验
+        if ((StrUtil.hasEmpty(infoContent) && infoType != Constant.INFO_TYPE_BIO) || StrUtil.hasEmpty(userID) || StrUtil.hasEmpty(token) || null == infoType ||
+                (infoType.equals(Constant.INFO_TYPE_AVATAR) && avatar == null)) {
+            response.setMessage("empty messages!");
+            response.setTime(new Date());
+            response.setStatusCode(Constant.CODE_CHECK_FAILURE);
+            log.info("更新失败！有为空的参数!");
+            log.info("infoType:" + infoType);
+            log.info("userID:" + userID);
+            log.info("token:" + token);
+            return response;
+        }
+
+        //获取头像
+        byte[] avatars = null;
+        if (avatar != null && infoType.equals(Constant.INFO_TYPE_AVATAR)) {
+            avatars = avatar.getBytes();
+        }
+
+        //调用Service方法完成更新操作
+        return userService.updateInfo(infoType, infoContent, userID, token, avatars);
+    }
 }

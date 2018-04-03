@@ -1,15 +1,18 @@
 package me.weey.graduationproject.server.service.inter;
 
 
+import me.weey.graduationproject.server.entity.Avatar;
 import me.weey.graduationproject.server.entity.FileRecord;
+import me.weey.graduationproject.server.entity.HttpResponse;
 
+import java.io.File;
 import java.util.Date;
 
 /**
  * 上传文件的Service接口
  * Created by WeiKai on 2018/03/09.
  */
-public interface IUploadFileService {
+public interface IUploadService {
 
     /**
      * 数据库记录文件的Service接口
@@ -30,4 +33,5 @@ public interface IUploadFileService {
      * 新增第一次下载的时间记录
      */
     int addFirstDownloadTime(String hash, Date date);
+
 }

@@ -20,4 +20,9 @@ public interface AvatarDao {
      * 根据id查找用户头像
      */
     Avatar findById(String id);
+
+    /**
+     * 更新头像
+     */
+    Integer updateAvatar(Avatar avatar);
 }

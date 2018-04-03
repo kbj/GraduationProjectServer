@@ -14,4 +14,9 @@
     <select id="findById" parameterType="String" resultType="Avatar">
         SELECT * FROM avatar WHERE id=#{id}
     </select>
+
+    <!--更新头像-->
+    <select id="updateAvatar" parameterType="Avatar">
+        update avatar set avatar=#{avatar, typeHandler=org.apache.ibatis.type.BlobTypeHandler} where id=#{id}
+    </select>
 </mapper>

@@ -5,6 +5,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.crypto.digest.Digester;
 import cn.hutool.extra.mail.MailUtil;
 import cn.hutool.log.Log;
@@ -13,15 +14,19 @@ import me.weey.graduationproject.server.dao.inter.AvatarDao;
 import me.weey.graduationproject.server.dao.inter.UserDao;
 import me.weey.graduationproject.server.dao.inter.UserStatusDao;
 import me.weey.graduationproject.server.entity.Avatar;
+import me.weey.graduationproject.server.entity.HttpResponse;
 import me.weey.graduationproject.server.entity.User;
 import me.weey.graduationproject.server.entity.UserStatus;
+import me.weey.graduationproject.server.service.inter.IKeyService;
 import me.weey.graduationproject.server.service.inter.IUserService;
 import me.weey.graduationproject.server.utils.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,12 +41,18 @@ public class UserServiceImpl implements IUserService {
     private final UserDao userDao;
     private final UserStatusDao userStatusDao;
     private final AvatarDao avatarDao;
+    private final HttpResponse httpResponse;
+    private final IKeyService keyService;
+    private final Avatar avatarObject;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, UserStatusDao userStatusDao, AvatarDao avatarDao) {
+    public UserServiceImpl(UserDao userDao, UserStatusDao userStatusDao, AvatarDao avatarDao, HttpResponse httpResponse, IKeyService keyService, Avatar avatarObject) {
         this.userDao = userDao;
         this.userStatusDao = userStatusDao;
         this.avatarDao = avatarDao;
+        this.httpResponse = httpResponse;
+        this.keyService = keyService;
+        this.avatarObject = avatarObject;
     }
 
     /**
@@ -200,5 +211,84 @@ public class UserServiceImpl implements IUserService {
             return Constant.CODE_SUCCESS;
         }
         return Constant.CODE_FAILURE;
+    }
+
+    /**
+     * 更新用户信息
+     * @param infoType      信息类型
+     * @param infoContent   信息内容
+     * @param userID        对应用户ID
+     * @param token         token值
+     * @param avatar        头像
+     * @return              更新结果
+     */
+    @Transactional
+    @Override
+    public HttpResponse updateInfo(Integer infoType, String infoContent, String userID, String token, byte[] avatar) {
+        //判断该用户是否在线
+        WebSocketSession socketSession = Constant.getLoginSessionInstant().get(userID);
+        if (socketSession == null) {
+            httpResponse.setStatusCode(Constant.CODE_CHECK_FAILURE);
+            httpResponse.setMessage("登录状态错误!");
+            httpResponse.setTime(new Date());
+            log.info("错误参数，此userID并没有登录！" + userID);
+            return httpResponse;
+        }
+        //计算Token
+        String correctToken = DigestUtil.sha256Hex(userID + keyService.getPublicKey() + "token");
+        if (!correctToken.equals(token)) {
+            //token错误
+            log.info("token校验错误，输入的token：" + token);
+            log.info("真实的token为：" + correctToken);
+            httpResponse.setStatusCode(Constant.CODE_CHECK_FAILURE);
+            httpResponse.setTime(new Date());
+            httpResponse.setMessage("token check error");
+            return httpResponse;
+        }
+        //根据类型更新相应数据
+        Integer updateResult = 0;
+        switch (infoType) {
+            case Constant.INFO_TYPE_AVATAR:
+                //更新头像
+                avatarObject.setId(userID);
+                avatarObject.setAvatar(avatar);
+                avatarDao.updateAvatar(avatarObject);
+                updateResult = 1;
+                break;
+            case Constant.INFO_TYPE_GENDER:
+                //更新性别
+                updateResult = userDao.updateGender(userID, Integer.valueOf(infoContent.trim()));
+                break;
+            case Constant.INFO_TYPE_NAME:
+                //更新名称
+                //判断新改的名称是否重复
+                User user = findUser(infoContent, infoContent, infoContent);
+                if (user != null) {
+                    httpResponse.setStatusCode(Constant.CODE_CHECK_FAILURE);
+                    httpResponse.setMessage("已有人使用该名称啦！换个新的试试吧！");
+                    httpResponse.setTime(new Date());
+                    return httpResponse;
+                } else {
+                    //表示这个名称可以使用
+                    updateResult = userDao.updateName(userID, infoContent);
+                }
+                break;
+            case Constant.INFO_TYPE_BIO:
+                //更新简介
+                updateResult = userDao.updateBio(userID, infoContent);
+                break;
+        }
+        //对结果判断
+        if (updateResult == 1) {
+            //更新成功要返回新的数据回去更新
+            httpResponse.setStatusCode(Constant.CODE_SUCCESS);
+            httpResponse.setTime(new Date());
+            httpResponse.setMessage("更新成功!");
+        } else {
+            httpResponse.setStatusCode(Constant.CODE_CHECK_FAILURE);
+            httpResponse.setMessage("更新失败！请重试！");
+            httpResponse.setTime(new Date());
+        }
+        return httpResponse;
     }
 }

@@ -1,6 +1,6 @@
 package me.weey.graduationproject.server.service;
 
-import me.weey.graduationproject.server.service.inter.IUploadFileService;
+import me.weey.graduationproject.server.service.inter.IUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class UploadFileSchedule {
 
-    private final IUploadFileService uploadFileService;
+    private final IUploadService uploadFileService;
 
     @Autowired
-    public UploadFileSchedule(IUploadFileService uploadFileService) {
+    public UploadFileSchedule(IUploadService uploadFileService) {
         this.uploadFileService = uploadFileService;
     }
 

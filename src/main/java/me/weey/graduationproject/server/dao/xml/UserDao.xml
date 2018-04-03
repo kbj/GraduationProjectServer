@@ -23,6 +23,18 @@
     <insert id="addFriend" parameterType="String">
         INSERT INTO chat_friends(id, invite_id) VALUES (#{id}, #{inviteID})
     </insert>
+
+    <update id="updateGender">
+        update chat_user set gender=#{gender} where id=#{id}
+    </update>
+
+    <update id="updateName" parameterType="String">
+        update chat_user set user_name=#{name} where id=#{id}
+    </update>
+
+    <update id="updateBio" parameterType="String">
+        update chat_user set bio=#{bio} where id=#{id}
+    </update>
     <!--字段不一致需要映射-->
     <resultMap id="UserMap" type="User">
         <id column="id" property="id"/>

@@ -7,16 +7,16 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import me.weey.graduationproject.server.entity.Avatar;
 import me.weey.graduationproject.server.entity.FileRecord;
+import me.weey.graduationproject.server.entity.HttpResponse;
 import me.weey.graduationproject.server.entity.User;
-import me.weey.graduationproject.server.service.inter.IUploadFileService;
+import me.weey.graduationproject.server.service.inter.IUploadService;
 import me.weey.graduationproject.server.service.inter.IUserService;
+import me.weey.graduationproject.server.utils.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,17 +32,21 @@ import java.util.Date;
  */
 @Controller
 @RequestMapping("/file")
-public class UploadFileController {
+public class UploadController {
 
     private static final Log log = LogFactory.get();
 
-    private final IUploadFileService uploadFileService;
+    private final IUploadService uploadFileService;
     private final IUserService userService;
+    private final HttpResponse httpResponse;
+    private final Avatar avatarEntity;
 
     @Autowired
-    public UploadFileController(IUploadFileService uploadFileService, IUserService userService) {
+    public UploadController(IUploadService uploadFileService, IUserService userService, HttpResponse httpResponse, Avatar avatar) {
         this.uploadFileService = uploadFileService;
         this.userService = userService;
+        this.httpResponse = httpResponse;
+        this.avatarEntity = avatar;
     }
 
     /**
@@ -88,7 +92,7 @@ public class UploadFileController {
         return downloadPath;
     }
 
-    /**
+    /*
      * 保存数据到数据库，然后记录保存的时间，设置好定时任务
      */
    private class UploadFileEndingThread implements Runnable {
@@ -112,7 +116,7 @@ public class UploadFileController {
     /**
      * 提供文件的下载服务
      */
-    @RequestMapping("download/{hashCode}")
+    @RequestMapping("/download/{hashCode}")
     @ResponseBody
     public void downloadFile(@PathVariable String hashCode, HttpServletResponse response) {
         FileRecord fileRecord = uploadFileService.findFile(hashCode);
@@ -146,7 +150,7 @@ public class UploadFileController {
         ThreadUtil.excAsync(addFirstDownloadTimeThread, false);
     }
 
-    /**
+    /*
      * 下载的时候判断是否需要添加下载时间
      */
     private class AddFirstDownloadTimeThread implements Runnable {

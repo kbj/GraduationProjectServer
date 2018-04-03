@@ -1,6 +1,7 @@
 package me.weey.graduationproject.server.service.inter;
 
 import me.weey.graduationproject.server.entity.Avatar;
+import me.weey.graduationproject.server.entity.HttpResponse;
 import me.weey.graduationproject.server.entity.User;
 import me.weey.graduationproject.server.entity.UserStatus;
 
@@ -51,4 +52,9 @@ public interface IUserService {
      * 添加好友
      */
     int addFriend(String myID, String friendID);
+
+    /**
+     * 更新用户信息
+     */
+    HttpResponse updateInfo(Integer infoType, String infoContent, String userID, String token, byte[] avatar);
 }

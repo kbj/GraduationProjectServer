@@ -3,14 +3,21 @@ package me.weey.graduationproject.server.service.impl;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import me.weey.graduationproject.server.dao.inter.AvatarDao;
 import me.weey.graduationproject.server.dao.inter.UploadFilRecordDao;
+import me.weey.graduationproject.server.entity.Avatar;
 import me.weey.graduationproject.server.entity.FileRecord;
-import me.weey.graduationproject.server.service.inter.IUploadFileService;
+import me.weey.graduationproject.server.entity.HttpResponse;
+import me.weey.graduationproject.server.service.inter.IKeyService;
+import me.weey.graduationproject.server.service.inter.IUploadService;
+import me.weey.graduationproject.server.utils.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
 import java.util.Date;
@@ -20,15 +27,21 @@ import java.util.List;
  * Created by WeiKai on 2018/03/09.
  */
 @Service
-public class UploadFileServiceImpl implements IUploadFileService {
+public class UploadServiceImpl implements IUploadService {
 
     private static final Log log = LogFactory.get();
 
     private final UploadFilRecordDao uploadFilRecordDao;
+    private final HttpResponse httpResponse;
+    private final IKeyService keyService;
+    private final AvatarDao avatarDao;
 
     @Autowired
-    public UploadFileServiceImpl(UploadFilRecordDao uploadFilRecordDao) {
+    public UploadServiceImpl(UploadFilRecordDao uploadFilRecordDao, HttpResponse httpResponse, IKeyService keyService, AvatarDao avatarDao) {
         this.uploadFilRecordDao = uploadFilRecordDao;
+        this.httpResponse = httpResponse;
+        this.keyService = keyService;
+        this.avatarDao = avatarDao;
     }
 
     /**
@@ -61,10 +74,11 @@ public class UploadFileServiceImpl implements IUploadFileService {
         //查询出所有
         List<FileRecord> fileRecords = uploadFilRecordDao.findAllFiles();
         //获取当前时间
+        Date now = new Date();
         for (FileRecord fileRecord : fileRecords) {
             //比较时间
-            long length = DateUtil.between(fileRecord.getFileUploadTime(), fileRecord.getFirstDownloadTime(), DateUnit.DAY);
-            if (length >= 1) {
+            long length = DateUtil.between(now, fileRecord.getFirstDownloadTime(), DateUnit.DAY);
+            if (length >= 7) {
                 //删除这个文件
                 File file = new File(fileRecord.getFileSavePath());
                 if (file.exists()) {
@@ -104,4 +118,5 @@ public class UploadFileServiceImpl implements IUploadFileService {
     public int addFirstDownloadTime(String hash, Date date) {
         return uploadFilRecordDao.addFirstDownloadTime(hash, date);
     }
+
 }

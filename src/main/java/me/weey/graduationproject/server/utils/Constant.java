@@ -124,6 +124,17 @@ public class Constant {
     //握手的第三部以后的信息，发送消息到对应客户端
     public static final int MESSAGE_TYPE_SEND_MESSAGE = 1105;
 
+
+    /**
+     * --------------------------------------------------------------
+     * |--------------------更新消息的类型---------------------------|
+     * --------------------------------------------------------------
+     */
+    public static final int INFO_TYPE_NAME = 1201;      //昵称
+    public static final int INFO_TYPE_GENDER = 1202;    //性别
+    public static final int INFO_TYPE_AVATAR = 1203;    //头像
+    public static final int INFO_TYPE_BIO = 1204;       //个人简介
+
     /**
      * 用户登陆以及除了聊天以外的Socket连接的Session信息的集合
      */

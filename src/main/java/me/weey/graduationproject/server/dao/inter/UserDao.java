@@ -31,4 +31,19 @@ public interface UserDao {
      * 新增好友
      */
     int addFriend(@Param("id") String id, @Param("inviteID") String inviteID);
+
+    /**
+     * 更新性别
+     */
+    int updateGender(@Param("id") String id, @Param("gender") int gender);
+
+    /**
+     * 更新名称
+     */
+    int updateName(@Param("id") String id, @Param("name") String name);
+
+    /**
+     * 更新个人简介
+     */
+    int updateBio(@Param("id") String id, @Param("bio") String bio);
 }

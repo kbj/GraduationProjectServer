@@ -46,4 +46,9 @@ public interface UserDao {
      * 更新个人简介
      */
     int updateBio(@Param("id") String id, @Param("bio") String bio);
+
+    /**
+     * 更新密码
+     */
+    int updatePassword(@Param("id") String id, @Param("password") String password);
 }

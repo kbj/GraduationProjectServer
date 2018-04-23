@@ -134,6 +134,7 @@ public class Constant {
     public static final int INFO_TYPE_GENDER = 1202;    //性别
     public static final int INFO_TYPE_AVATAR = 1203;    //头像
     public static final int INFO_TYPE_BIO = 1204;       //个人简介
+    public static final int INFO_TYPE_PASSWORD = 1205;  //密码
 
     /**
      * 用户登陆以及除了聊天以外的Socket连接的Session信息的集合

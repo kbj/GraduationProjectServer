@@ -35,6 +35,10 @@
     <update id="updateBio" parameterType="String">
         update chat_user set bio=#{bio} where id=#{id}
     </update>
+
+    <update id="updatePassword" parameterType="String">
+        update chat_user set password=#{password} where id=#{id}
+    </update>
     <!--字段不一致需要映射-->
     <resultMap id="UserMap" type="User">
         <id column="id" property="id"/>

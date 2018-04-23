@@ -277,6 +277,15 @@ public class UserServiceImpl implements IUserService {
                 //更新简介
                 updateResult = userDao.updateBio(userID, infoContent);
                 break;
+            case Constant.INFO_TYPE_PASSWORD:
+                //更新密码
+                //获取激活码
+                UserStatus userStatus = userStatusDao.findById(userID);
+                //加密
+                String saltEncryption = saltEncryption(userStatus.getActiveCode(), infoContent);
+                //更新密码
+                updateResult = userDao.updatePassword(userID, saltEncryption);
+                break;
         }
         //对结果判断
         if (updateResult == 1) {

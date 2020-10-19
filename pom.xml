@@ -14,7 +14,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <!--bouncycastle版本-->
         <bouncycastle.version>1.59</bouncycastle.version>
-        <spring.version>4.3.13.RELEASE</spring.version>
+        <spring.version>5.2.9.RELEASE</spring.version>
         <fastjson.version>1.2.44</fastjson.version>
         <aspectj.version>1.8.13</aspectj.version>
         <mysql.version>5.1.45</mysql.version>
